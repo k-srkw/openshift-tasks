@@ -1,0 +1,16 @@
+# Maven / Gradle
+target
+
+# Eclipse / Visual Studio Code(Language Support for Java)
+.classpath
+.project
+.settings
+
+# IntelliJ IDEA
+.idea
+*.iml
+
+# Misc
+*.log
+
+hs_err_pid*
