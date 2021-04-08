@@ -18,7 +18,11 @@ pipeline {
     stage('Code Analysis') {
       steps {
         script {
-          sh "mvn -s configuration/cicd-settings-nexus3.xml install sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=5bc9cea4773892d896bf90df516311280f35d4e7 -DskipTests=true"
+          openshift.withCluster() {
+            withCredentials([usernamePassword(credentialsId: "${openshift.project()}-sonar-cicd-secret", usernameVariable: "SONAR_USER", passwordVariable: "SONAR_PWD")]) {
+              sh "mvn -s configuration/cicd-settings-nexus3.xml install sonar:sonar -Dsonar.host.url=http://sonarqube:9000 -Dsonar.login=$SONAR_USER -Dsonar.password=$SONAR_PWD -DskipTests=true"
+            }
+          }
         }
       }
     }
@@ -72,7 +76,7 @@ spec:
       }
       steps {
         dir('UAT') {
-          sh "mvn -s ../configuration/cicd-settings-nexus3.xml test -Dselenide.browser=firefox -Dselenide.remote=http://localhost:4444/wd/hub/"
+          sh "mvn -s ../configuration/cicd-settings-nexus3.xml test -Dselenide.browser=firefox -Dselenide.remote=http://localhost:4444/wd/hub/ -Dselenide.baseUrl=http://tasks-dev-cicd.apps.cluster-e270.e270.sandbox1387.opentlc.com/"
           step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
         }
       }
